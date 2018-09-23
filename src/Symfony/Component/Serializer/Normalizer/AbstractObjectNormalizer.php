@@ -18,7 +18,6 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\LogicException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
-use Symfony\Component\Serializer\Exception\RuntimeException;
 use Symfony\Component\Serializer\Mapping\AttributeMetadataInterface;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
@@ -120,28 +119,6 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
         }
 
         return $data;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, string $format = null)
-    {
-        if ($this->classDiscriminatorResolver && $mapping = $this->classDiscriminatorResolver->getMappingForClass($class)) {
-            if (!isset($data[$mapping->getTypeProperty()])) {
-                throw new RuntimeException(sprintf('Type property "%s" not found for the abstract object "%s"', $mapping->getTypeProperty(), $class));
-            }
-
-            $type = $data[$mapping->getTypeProperty()];
-            if (null === ($mappedClass = $mapping->getClassForType($type))) {
-                throw new RuntimeException(sprintf('The type "%s" has no mapped class for the abstract object "%s"', $type, $class));
-            }
-
-            $class = $mappedClass;
-            $reflectionClass = new \ReflectionClass($class);
-        }
-
-        return parent::instantiateObject($data, $class, $context, $reflectionClass, $allowedAttributes, $format);
     }
 
     /**
